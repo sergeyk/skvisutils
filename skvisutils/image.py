@@ -1,17 +1,18 @@
+import os
 import time
 import numpy as np
 from skimage.io import imread,imsave,imshow
 import xml.dom.minidom as minidom
 
-from skpyutils.table import Table
-import skpyutils.util as skutil
+from skpyutils import Table, skutil
 
-import skvisutils.config as config
 from skvisutils.bounding_box import BoundingBox
 from skvisutils.sliding_windows import SlidingWindows
 
 class Image(object):
-  "An image has a name, size and a Table of objects."
+  """
+  An image has a name, size and a Table of objects.
+  """
 
   columns = BoundingBox.columns + ['cls_ind', 'diff', 'trun']
   
@@ -32,18 +33,24 @@ class Image(object):
     return "Image (%(name)s)\n  W x H: %(width)d x %(height)d\n  Objects:\n %(objects_table)s" % self.__dict__
 
   def display_image(self):
-    "Display the image using skimage."
+    """
+    Display the image using skimage.
+    """
     imshow(self.load_image())
 
   def load_image(self):
-    "Return the image loaded using skimage."
+    """
+    Return the image loaded using skimage.
+    """
     if not self.filename:
       print("Image: Cannot load, no associated filename")
       return None
     return imread(self.filename)
 
   def get_objects(self,with_diff=False,with_trun=True):
-    "Return Table of objects filtered with the parameters."
+    """
+    Return Table of objects filtered with the parameters.
+    """
     df = self.objects_table
     df = df if with_diff else df.filter_on_column('diff',0) 
     df = df if with_trun else df.filter_on_column('trun',0) 
@@ -62,7 +69,9 @@ class Image(object):
     return objects
 
   def get_cls_counts(self, with_diff=False, with_trun=True):
-    "Return an array of the counts of each class in the image."
+    """
+    Return an array of the counts of each class in the image.
+    """
     counts = np.zeros(len(self.classes))
     objects = self.get_objects(with_diff,with_trun)
     if objects.shape[0]>0:
@@ -73,11 +82,15 @@ class Image(object):
     return counts
 
   def get_cls_gt(self,with_diff=False,with_trun=False):
-    "Return an array of class presence (True/False) ground truth."
+    """
+    Return an array of class presence (True/False) ground truth.
+    """
     return self.get_cls_counts(with_diff,with_trun)>0
 
   def contains_class(self, cls_name, with_diff=False, with_trun=True):
-    "Return whether the image contains an object of class cls_name."
+    """
+    Return whether the image contains an object of class cls_name.
+    """
     gt = self.get_cls_gt(with_diff,with_trun)
     return gt[self.classes.index(cls_name)]
 
@@ -126,7 +139,7 @@ class Image(object):
     return img
   
   @classmethod
-  def load_from_pascal_xml_filename(cls, classes, filename):
+  def load_from_pascal_xml_filename(cls, classes, filename, images_dir):
     "Load image info from a file in the PASCAL VOC XML format."
 
     def get_data_from_tag(node, tag):
@@ -144,7 +157,7 @@ class Image(object):
 
     # image info
     name = get_data_from_tag(data, "filename")
-    filename = opjoin(config.VOC_dir, 'JPEGImages', name)
+    filename = os.path.join(images_dir, name)
     size = data.getElementsByTagName("size")[0]
     im_width = int(get_data_from_tag(size, "width"))
     im_height = int(get_data_from_tag(size, "height"))

@@ -1,3 +1,4 @@
+import os
 from os.path import join,exists
 import getpass
 
@@ -63,7 +64,7 @@ class Config(object):
     Raises:
       ValueError
     """
-    if not opexists(self.pascal_dir):
+    if not exists(self.pascal_dir):
       raise ValueError("self.pascal_dir is not set correctly")
 
     return join(self.pascal_dir, 'ImageSets/Main/{0}.txt'.format(name))

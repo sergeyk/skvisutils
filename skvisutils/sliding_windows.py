@@ -1,8 +1,7 @@
-from synthetic.common_imports import *
-from synthetic.common_mpi import *
-import synthetic.config as config
+import time
+import numpy as np
 
-from synthetic.bounding_box import BoundingBox
+from skvisutils import BoundingBox
 
 class WindowParams:
   """

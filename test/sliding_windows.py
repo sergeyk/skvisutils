@@ -1,7 +1,7 @@
 from context import *
 
-from skvisutils.image import Image
-from skvisutils.sliding_windows import SlidingWindows
+from skvisutils import Image, SlidingWindows
+from skvisutils.sliding_windows import WindowParams
 
 class TestSlidingWindows:
   def test_get_windows(self):

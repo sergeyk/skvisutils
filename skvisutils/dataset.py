@@ -1,14 +1,13 @@
+from sklearn.cross_validation import KFold
+import cPickle
+import os
 import re
 import simplejson as json
 import numpy as np
 import matplotlib.pyplot as plt
-
-
 from skpyutils import TicToc, Table, skutil
-from skpyutils import Table
 
-from skvisutils.image import Image
-from skvisutils.sliding_windows import SlidingWindows
+from skvisutils import Image, SlidingWindows, Config
 
 class Dataset(object):
   """
@@ -29,7 +28,7 @@ class Dataset(object):
     and where to cache the loaded dataset and to output figures if needed.
 
     Args:
-      config (skvisutils.config.Config)
+      config (skvisutils.config.Config): sets paths and such
 
       name (string): [optional] identifying information
     
@@ -39,6 +38,8 @@ class Dataset(object):
     Raises:
       none
     """
+    assert(isinstance(config,Config))
+    self.config = config
     self.name = name
 
     self.classes = []
@@ -183,8 +184,8 @@ class Dataset(object):
     tt = TicToc().tic()
     print("Dataset: %s"%self.get_name())
 
-    filename = config.get_cached_dataset_filename(self.get_name())
-    if opexists(filename) and not force:
+    filename = self.config.get_cached_dataset_filename(self.get_name())
+    if os.path.exists(filename) and not force:
       with open(filename) as f:
         cached = cPickle.load(f)
         self.classes = cached['classes']
@@ -193,24 +194,25 @@ class Dataset(object):
     
     else:
       print("...loading from scratch")
-      self.classes = config.pascal_classes 
+      self.classes = self.config.pascal_classes 
       
-      with open(config.pascal_paths[name]) as f:
+      with open(self.config.get_pascal_path(name)) as f:
         imgset = [line.strip() for line in f.readlines() if len(line)>0]
       
+      images_dir = os.path.join(self.config.pascal_dir, "JPEGImages")
       for i,img in enumerate(imgset):
         tt.running('loading', "...on image {0}/{1}".format(i,len(imgset)))
 
-        xml_filename = opjoin(config.VOC_dir,'Annotations',img+'.xml')
+        xml_filename = os.path.join(self.config.pascal_dir,'Annotations',img+'.xml')
         self.images.append(
-          Image.load_from_pascal_xml_filename(self.classes,xml_filename))
+          Image.load_from_pascal_xml_filename(self.classes,xml_filename,images_dir))
 
       print("...saving to cache file")
       data = {'classes': self.classes, 'images': self.images}
-      filename = config.get_cached_dataset_filename(name)
+      filename = self.config.get_cached_dataset_filename(name)
       with open(filename, 'w') as f: cPickle.dump(data, f)
       
-      print("done in %.2f s\n"%tt.qtoc())
+      print("...done in %.2f s\n"%tt.qtoc())
     
     return self.after_load()
 
@@ -299,6 +301,7 @@ class Dataset(object):
     - n corresponds to index into self.images,
     - k corresponds to index into self.classes.
     """
+    assert(len(self.images)>0)
     kwargs = {'with_diff':with_diff, 'with_trun':with_trun}
     return skutil.collect(self.images, Image.get_cls_counts, kwargs)
 
@@ -306,6 +309,7 @@ class Dataset(object):
     """
     Return Table of classification (0/1) ground truth.
     """
+    assert(len(self.images)>0)
     arr = self.get_cls_counts(with_diff,with_trun)>0
     return Table(arr,self.classes)
 
@@ -314,10 +318,10 @@ class Dataset(object):
     Return Table of detection ground truth.
     Cache the results for the given parameter settings.
     """
+    assert(len(self.images)>0)
     name = '%s%s'%(with_diff,with_trun)
     if name not in self.cached_det_ground_truth:
       kwargs = {'with_diff':with_diff, 'with_trun':with_trun}
-      #from IPython import embed; embed()
       table = skutil.collect_with_index(
         self.images, Image.get_det_gt, kwargs, 'img_ind')
       self.cached_det_ground_truth[name] = table
@@ -327,6 +331,7 @@ class Dataset(object):
     """
     Return Table of detection ground truth, filtered for the given class.
     """
+    assert(len(self.images)>0)
     gt = self.get_det_gt(with_diff,with_trun)
     return gt.filter_on_column('cls_ind',self.classes.index(class_name))
 
@@ -355,8 +360,8 @@ class Dataset(object):
     ax.set_xlabel('Number of classes present in the image')
     ax.grid(False)
 
-    dirname = config.get_dataset_stats_dir(self)
-    filename = opjoin(dirname,'num_classes.png')
+    dirname = self.config.get_dataset_stats_dir(self)
+    filename = os.path.join(dirname,'num_classes.png')
     fig.savefig(filename)
     return fig
 
@@ -515,9 +520,9 @@ class Dataset(object):
     cb.ax.artists.remove(cb.outline)
 
     # Save figure
-    dirname = config.get_dataset_stats_dir(self)
+    dirname = self.config.get_dataset_stats_dir(self)
     suffix = '_second_order' if second_order else ''
-    filename = opjoin(dirname,'cooccur%s.png'%suffix)
+    filename = os.path.join(dirname,'cooccur%s.png'%suffix)
     fig.savefig(filename)
 
     return fig
@@ -567,6 +572,8 @@ class Dataset(object):
   
   def get_neg_samples_for_fold_class(self, cls, num_samples, with_diff=False,
       with_trun=True):
+    if num_samples==0:
+      return np.array([])
     if not hasattr(self, 'train'):
       return self.get_neg_samples_for_class(cls, num_samples, with_diff, with_trun)
     all_neg = self.get_neg_samples_for_class(cls, None, with_diff, with_trun)
@@ -595,5 +602,4 @@ class Dataset(object):
       return np.array([])
     pos_indices = self.get_pos_samples_for_class(cls,with_diff,with_trun)
     neg_indices = np.setdiff1d(np.arange(len(self.images)),pos_indices,assume_unique=True)
-    # TODO tobi: why do these have to be ordered?
-    return skutil.random_subset(neg_indices, number, ordered=True)
+    return skutil.random_subset(neg_indices, number)
