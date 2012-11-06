@@ -1,8 +1,7 @@
-from synthetic.common_imports import *
+from context import *
 
-from synthetic.image import *
-from synthetic.sliding_windows import *
-import synthetic.config as config
+from skvisutils.image import Image
+from skvisutils.sliding_windows import SlidingWindows
 
 class TestSlidingWindows:
   def test_get_windows(self):

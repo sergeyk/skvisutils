@@ -105,7 +105,7 @@ class Image(object):
   # Loaders
   ###
   @classmethod
-  def load_from_json_data(cls, classes, data):
+  def load_from_json(cls, classes, data):
     "Return an Image instantiated from a JSON representation."
     name = data['name']
     width = data['size'][0]
