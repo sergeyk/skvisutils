@@ -1,6 +1,12 @@
 """
 Miscellaneous utilities.
 """
+import numpy as np
+
+from skpyutils import Table
+
+def nms_detections_table(dets_table, overlap=0.5):
+  return Table(nms_detections(dets_table.arr, dets_table.cols), dets_table.cols)
 
 def nms_detections(dets, cols, overlap=0.5):
   """

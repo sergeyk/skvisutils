@@ -236,7 +236,8 @@ def compute_det_pr_and_hard_neg(dets, gt, min_overlap=0.5):
   for the ground truth.
 
   Args:
-    dets (skpyutils.Table): detections
+    dets (skpyutils.Table): detections.
+      !NOTE: the first four columns must be the bounding box coordinates!
 
     gt (skpyutils.Table): detectin ground truth
       Can be for a single image or a whole dataset, and can contain either all

@@ -184,7 +184,7 @@ class Dataset(object):
     tt = TicToc().tic()
     print("Dataset: %s"%self.get_name())
 
-    filename = self.config.get_cached_dataset_filename(self.get_name())
+    filename = self.config.get_cached_dataset_filename(self.name)
     if os.path.exists(filename) and not force:
       with open(filename) as f:
         cached = cPickle.load(f)
@@ -209,7 +209,7 @@ class Dataset(object):
 
       print("...saving to cache file")
       data = {'classes': self.classes, 'images': self.images}
-      filename = self.config.get_cached_dataset_filename(name)
+      filename = self.config.get_cached_dataset_filename(self.name)
       with open(filename, 'w') as f: cPickle.dump(data, f)
       
       print("...done in %.2f s\n"%tt.qtoc())

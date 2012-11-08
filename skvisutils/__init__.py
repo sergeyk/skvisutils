@@ -1,3 +1,4 @@
+from util import *
 from config import Config
 from bounding_box import BoundingBox
 from sliding_windows import WindowParams, SlidingWindows
