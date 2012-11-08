@@ -6,8 +6,7 @@ import xml.dom.minidom as minidom
 
 from skpyutils import Table, skutil
 
-from skvisutils.bounding_box import BoundingBox
-from skvisutils.sliding_windows import SlidingWindows
+from skvisutils import BoundingBox, SlidingWindows
 
 class Image(object):
   """

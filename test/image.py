@@ -1,12 +1,10 @@
 from context import *
 import time
-from skpyutils.table import Table
+from skpyutils import Table, skutil
 
-from skvisutils.image import Image
-from skvisutils.bounding_box import BoundingBox
-from skvisutils.sliding_windows import WindowParams
+from skvisutils import Image, BoundingBox, WindowParams
 
-class TestImage:
+class TestImage(object):
   def setup(self):
     self.data = {
       "name": "test_image",

@@ -1,24 +1,9 @@
 from context import *
 from skpyutils import Table, skutil
 
-from skvisutils.dataset import Dataset, Config
+from skvisutils import Dataset, Config
 
-test_dir = os.path.abspath(os.path.dirname(__file__))
-test_support_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'support'))
-test_data1 = os.path.join(test_support_dir,'data1.json')
-test_data2 = os.path.join(test_support_dir,'data2.json')
-
-# create config for small tests
-res_dir = os.path.join(test_dir, 'temp','res')
-temp_dir = os.path.join(test_dir, 'temp','temp')
-pascal_dir = os.path.join(test_support_dir, 'VOC2007')
-config = Config(res_dir,temp_dir,pascal_dir)
-
-# create config for full tests
-PATH_TO_VOC2007 = '/Users/sergeyk/work/vision_data/VOC2007'
-full_config = Config(res_dir,temp_dir,PATH_TO_VOC2007)
-
-class TestDatasetJson:
+class TestDatasetJson(object):
   def setup(self):
     self.d = Dataset(config, 'test_data1')
     self.d.load_from_json(test_data1)

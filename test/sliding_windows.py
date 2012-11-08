@@ -3,7 +3,7 @@ from context import *
 from skvisutils import Image, SlidingWindows
 from skvisutils.sliding_windows import WindowParams
 
-class TestSlidingWindows:
+class TestSlidingWindow(object):
   def test_get_windows(self):
     image = Image(3,2,['whatever'],'test')
     window_params = WindowParams(

@@ -333,7 +333,7 @@ class Dataset(object):
     """
     assert(len(self.images)>0)
     gt = self.get_det_gt(with_diff,with_trun)
-    return gt.filter_on_column('cls_ind',self.classes.index(class_name))
+    return gt.filter_on_column('cls_ind', self.classes.index(class_name))
 
   ###
   # Statistics

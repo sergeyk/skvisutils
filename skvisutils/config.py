@@ -72,34 +72,13 @@ class Config(object):
   def get_cached_dataset_filename(self, name):
     dirname = makedirs(join(self.res_dir,'cached_datasets'))
     return join(dirname, str(self.VOCyear)+'_'+name+'.pickle')
-
-  @property
-  def eval_support_dir(self):
-    return join(mod_dir, 'eval_support')
   
-  @property
-  def eval_template_filename (self):
-    return join(self.eval_support_dir, 'dashboard_template.html')
-
   @property
   def temp_res_dir(self):
     return makedirs(join(self.temp_dir, 'temp_results'))
 
   def get_dataset_stats_dir(self, dataset):
     return makedirs(join(self.res_dir, 'dataset_stats', dataset.name))
-
-# # ./results/evals
-# evals_dir = makedirs(join(res_dir, 'evals'))
-
-# # ./{evals_dir}/{dataset_name}
-# def get_evals_dir(dataset_name):
-#   return makedirs(join(evals_dir,dataset_name))
-
-# def get_evals_dp_dir(dp,train=False):
-#   dirname = get_evals_dir(dp.dataset.get_name())
-#   if train:
-#     dirname = get_evals_dir(dp.train_dataset.get_name())
-#   return makedirs(join(dirname, dp.get_config_name()))
 
 # def get_dp_dets_filename(dp,train=False):
 #   return join(get_evals_dp_dir(dp,train), 'cached_dets.npy')
