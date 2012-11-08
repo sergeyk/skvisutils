@@ -4,16 +4,16 @@ Includes methods to plot results and output a single HTML dashboard.
 """
 
 import os
+import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from mako.template import Template
 
-from skpyutils import mpi, TicToc, Table
+from skpyutils import skutil, mpi, TicToc, Table
 
 from skvisutils import Dataset, BoundingBox
 
-EVAL_TEMPLATE_FILENAME = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), 'support/dashboard_template.html'))
+SUPPORT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'support'))
 
 def evaluate_per_class_detections(dataset, dets, dirname, force=False):
   """
@@ -63,10 +63,9 @@ def evaluate_multiclass_detections(dataset, dets, dirname, force=False):
     ap (float), and outputs plots and supporting files to dirname
   """
   gt = dataset.get_det_gt(with_diff=True)
-  # TODO filename = opjoin(self.results_path, 'pr_whole_multiclass')
   if force or not opexists(filename):
     print("Evaluating %d dets in the multiclass setting..."%dets.shape[0])
-    ap = compute_and_plot_pr(dets, gt, 'multiclass', dirname)
+    ap = compute_and_plot_pr(dets, gt, 'multiclass', dirname, force)
   return ap
 
 def evaluate_detections_whole(dataset, dets, dirname, force=False):
@@ -92,10 +91,10 @@ def evaluate_detections_whole(dataset, dets, dirname, force=False):
 
   if mpi.comm_rank == 0:
     # TODO: re-run per-class to make sure they plot?
-
     ap_mc = evaluate_multiclass_detections(dataset, dets, dirname, force)
 
     # Write out the information to a single overview file
+    dirname = skutil.makedirs(dirname)
     filename = os.path.join(dirname, 'aps_whole.txt')
     with open(filename, 'w') as f:
       f.write("Multiclass: %.3f\n"%ap_mc)
@@ -103,13 +102,17 @@ def evaluate_detections_whole(dataset, dets, dirname, force=False):
       f.write(','.join(['%.3f'%ap for ap in aps])+'\n')
 
     # Assemble everything in one HTML file, the Dashboard
-    names = list(self.dataset.classes)+['mean ap','multiclass']
+    names = list(dataset.classes)+['mean ap','multiclass']
     aps = aps.tolist()+[np.mean(aps), ap_mc]
-    
-    template = Template(EVAL_TEMPLATE_FILENAME)
+
+    pngs = glob.glob(os.path.join(dirname, '*.png'))
+    aps_to_print = ['%.3f'%ap for ap in aps]
+
+    template_filename = os.path.join(SUPPORT_DIR, 'dashboard_template.html')
+    template = Template(filename=template_filename)
     filename = os.path.join(dirname,'whole_dashboard.html')
     with open(filename, 'w') as f:
-      f.write(template.render(names=names, aps=aps))
+      f.write(template.render(support_dir=SUPPORT_DIR, names=names, aps=aps_to_print, pngs=pngs))
   mpi.safebarrier()
 
 def compute_and_plot_pr(dets, gt, name, dirname, force=False):
@@ -132,14 +135,15 @@ def compute_and_plot_pr(dets, gt, name, dirname, force=False):
     ap (float), and outputs files to dirname
   """
   # TODO: isn't there some problem with MPI-distributed jobs not plotting?
+  dirname = skutil.makedirs(dirname)
   filename = os.path.join(dirname, 'pr_whole_{0}.txt'.format(name))
-  if force or not opexists(filename):
-    [ap,rec,prec] = self.compute_det_pr(dets, gt)
+  if force or not os.path.exists(filename):
+    [ap,rec,prec] = compute_det_pr(dets, gt)
     try:
       plot_filename = os.path.join(dirname, 'pr_whole_{0}.png'.format(name))
-      plot_pr(ap,rec,prec,name,plot_filename)
+      plot_pr(ap, rec, prec, name, plot_filename, force)
     except:
-      pass
+      print("compute_and_plot_pr: could not plot!")
     with open(filename, 'w') as f:
       f.write("%f\n"%ap)
       for i in range(np.shape(rec)[0]):
@@ -165,13 +169,13 @@ def plot_pr(ap, rec, prec, name, filename, force=False):
     filename (string): path to the resulting saved png
 
   Returns:
-    none
+    fig (matplotlib.Figure)
   """
-  # TODO: make return Figure
-  if opexists(filename) and not force:
+  if os.path.exists(filename) and not force:
     print("plot_pr: not doing anything as file exists")
     return
   label = "%s: %.3f"%(name,ap)
+  fig = plt.figure('pr_plot')
   plt.clf()
   plt.plot(rec,prec,label=label,color='black',linewidth=5)
   plt.xlim(0,1)
@@ -181,6 +185,7 @@ def plot_pr(ap, rec, prec, name, filename, force=False):
   plt.ylabel('Precision',size=16)
   plt.grid(True)
   plt.savefig(filename)
+  return fig
 
 def compute_det_map(dets, gt, values=None, det_perspective=False, min_overlap=0.5):
   """

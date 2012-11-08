@@ -5,32 +5,44 @@
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <title>Evaluation Dashboard</title>
-
-    <!-- Framework CSS -->
-    <link rel="stylesheet" href="../../evaluation_support/blueprint/screen.css" type="text/css" media="screen, projection">
-    <link rel="stylesheet" href="../../evaluation_support/blueprint/print.css" type="text/css" media="print">
-    <!--[if lt IE 8]><link rel="stylesheet" href="../evaluation_support/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    
+    <link rel="stylesheet" href="${support_dir}/screen.css" type="text/css">
   </head>
   
   <body>
     <div class="container">
+    <div class="prepend-4 span-16 append-4">
       <h1>Evaluation Dashboard</h1>
+
+      <h3>AP Table</h3>
       <table>
-        ${makerow(names)}
+        ${makerow(names,True)}
         ${makerow(aps)}
       </table>
-
       <hr />
-      <h3>Grid of P-R Curves</h3>
-      TODO
+
+      <h3>P-R Curves</h3>
+      ${output_pngs()}
+
+    </div>
     </div>
   </body>
 </html>
 
-<%def name="makerow(row)">
+<%def name="output_pngs()">
+  % for png in pngs:
+    <img src=${png} />
+  % endfor
+</%def>
+
+<%def name="makerow(row,header=False)">
     <tr>
     % for val in row:
-        <td>${val}</td>\
+      % if header:
+        <th>${val}</th>
+      % else:
+        <td>${val}</td>
+      % endif
     % endfor
     </tr>
 </%def>

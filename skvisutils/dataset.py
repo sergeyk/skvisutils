@@ -313,10 +313,22 @@ class Dataset(object):
     arr = self.get_cls_counts(with_diff,with_trun)>0
     return Table(arr,self.classes)
 
-  def get_det_gt(self, with_diff=True, with_trun=True):
+  def get_det_gt(self, class_name=None, with_diff=True, with_trun=True):
     """
     Return Table of detection ground truth.
     Cache the results for the given parameter settings.
+
+    Args:
+      class_name (string): [default None] 
+        If None, return all ground truth
+        Otherwise, return only ground truth for the given class.
+
+      with_diff (bool): [default True] include objects marked as 'difficult'
+      
+      with_trun (bool): [default True] include objects marked as 'truncated'
+
+    Returns:
+      gt (skpyutils.Table)
     """
     assert(len(self.images)>0)
     name = '%s%s'%(with_diff,with_trun)
@@ -330,14 +342,22 @@ class Dataset(object):
   def get_det_gt_for_class(self, class_name, with_diff=True, with_trun=True):
     """
     Return Table of detection ground truth, filtered for the given class.
+
+    Args:
+      class_name (string): class to return detection ground truth for
+
+      with_diff (bool): [default True] include objects marked as 'difficult'
+      
+      with_trun (bool): [default True] include objects marked as 'truncated'
+
+    Returns:
+      gt (skpyutils.Table)
     """
-    assert(len(self.images)>0)
     gt = self.get_det_gt(with_diff,with_trun)
     return gt.filter_on_column('cls_ind', self.classes.index(class_name))
 
-  ###
-  # Statistics
-  ###
+  ### Statistics
+  
   def plot_distribution(self):
     """
     Plot histogram of # classes in an image.
