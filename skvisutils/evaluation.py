@@ -225,10 +225,16 @@ def compute_det_map(dets, gt, values=None, det_perspective=False, min_overlap=0.
   return np.sum(aps/values_sum)
 
 def compute_det_pr(dets, gt, min_overlap=0.5):
+  """
+  Return the ap value and recall and precision vectors as a tuple.
+  """
   return compute_det_pr_and_hard_neg(dets, gt, min_overlap)[:3]
 
 def compute_det_hard_neg(dets, gt, min_overlap=0.5):
-  return compute_det_pr_and_hard_neg(dets, gt, min_overlap)[3]
+  """
+  Return hard_neg mask and sorted detections as a tuple.
+  """
+  return compute_det_pr_and_hard_neg(dets, gt, min_overlap)[3:]
   
 def compute_det_pr_and_hard_neg(dets, gt, min_overlap=0.5):
   """
@@ -252,9 +258,9 @@ def compute_det_pr_and_hard_neg(dets, gt, min_overlap=0.5):
       intersection overlap for a true positive.
 
   Returns:
-    (ap, recall, precision, hard_negatives): tuple of
-      (float, list, list, list, sorted_dets), where the lists are 0/1 masks
-      onto the sorted dets.
+    (ap,    recall, precision, hard_negatives, sorted_dets): tuple of
+    (float, list,   list,      list,           ndarray),
+    where the lists are 0/1 masks onto the sorted dets.
   """
   tt = TicToc().tic()
 
@@ -337,7 +343,7 @@ def compute_det_pr_and_hard_neg(dets, gt, min_overlap=0.5):
       gt.arr[inds,:] = gt_for_image
 
   ap,rec,prec = compute_rec_prec_ap(tp,fp,npos)
-  return (ap,rec,prec,hard_neg)
+  return (ap, rec, prec, hard_neg, dets)
 
 def compute_cls_map(clses,gt):
   """
