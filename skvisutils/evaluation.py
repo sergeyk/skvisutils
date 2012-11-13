@@ -115,6 +115,26 @@ def evaluate_detections_whole(dataset, dets, dirname, force=False):
       f.write(template.render(support_dir=SUPPORT_DIR, names=names, aps=aps_to_print, pngs=pngs))
   mpi.safebarrier()
 
+def compute_pr(dets, gt, name, dirname, force=False, plot=False):
+  dirname = skutil.makedirs(dirname)
+  filename = os.path.join(dirname, 'pr_whole_{0}.txt'.format(name))
+  if force or not os.path.exists(filename):
+    [ap,rec,prec] = compute_det_pr(dets, gt)
+    if plot:
+      try:
+        plot_filename = os.path.join(dirname, 'pr_whole_{0}.png'.format(name))
+        plot_pr(ap, rec, prec, name, plot_filename, force)
+      except:
+        print("compute_and_plot_pr: could not plot!")
+    with open(filename, 'w') as f:
+      f.write("%f\n"%ap)
+      for i in range(np.shape(rec)[0]):
+        f.write("%f %f\n"%(rec[i], prec[i]))
+  else:
+    with open(filename) as f:
+      ap = float(f.readline())
+  return ap
+
 def compute_and_plot_pr(dets, gt, name, dirname, force=False):
   """
   Compute the precision-recall curve from the given detections and ground truth
@@ -134,24 +154,7 @@ def compute_and_plot_pr(dets, gt, name, dirname, force=False):
   Returns:
     ap (float), and outputs files to dirname
   """
-  # TODO: isn't there some problem with MPI-distributed jobs not plotting?
-  dirname = skutil.makedirs(dirname)
-  filename = os.path.join(dirname, 'pr_whole_{0}.txt'.format(name))
-  if force or not os.path.exists(filename):
-    [ap,rec,prec] = compute_det_pr(dets, gt)
-    try:
-      plot_filename = os.path.join(dirname, 'pr_whole_{0}.png'.format(name))
-      plot_pr(ap, rec, prec, name, plot_filename, force)
-    except:
-      print("compute_and_plot_pr: could not plot!")
-    with open(filename, 'w') as f:
-      f.write("%f\n"%ap)
-      for i in range(np.shape(rec)[0]):
-        f.write("%f %f\n"%(rec[i], prec[i]))
-  else:
-    with open(filename) as f:
-      ap = float(f.readline())
-  return ap
+  compute_pr(dets, gt, name, dirname, force, plot=True)
 
 def plot_pr(ap, rec, prec, name, filename, force=False):
   """
