@@ -19,29 +19,19 @@ class Dataset(object):
     to get classification and detection ground truth,
     and to construct sets of train/test data.
 
-    Initialize the class with a Config and an optional name,
+    Initialize the class with a Config object and an optional name,
     but the actual loading of data must be done in a follow-up call:
     load_from_pascal, load_from_json, or generate_synthetic.
+
+    Parameters
+    ----------
+    config: skvisutils.config.Config
+        sets paths and such
+
+    name: string, optional
+        identifying information
     """
-
     def __init__(self, config, name=None):
-        """
-        Initialize with Config class, which determines where to load PASCAL from
-        and where to cache the loaded dataset and to output figures if needed.
-
-        Parameters
-        ----------
-        config: skvisutils.config.Config
-            sets paths and such
-
-        name: string, optional
-            identifying information
-
-        Returns
-        -------
-        self
-
-        """
         assert(isinstance(config, Config))
         self.config = config
         self.name = name
@@ -58,7 +48,6 @@ class Dataset(object):
         Returns
         -------
         self
-
         """
         self.image_names = [image.name for image in self.images]
         assert(len(self.image_names) == len(np.unique(self.image_names)))
@@ -158,11 +147,14 @@ class Dataset(object):
         """
         Load all parameters of the dataset from a JSON file.
 
-        Args:
-            filename (string): path to JSON data file
+        Parameters
+        ----------
+        filename: string
+            path to JSON data file
 
-        Returns:
-            self
+        Returns
+        -------
+        self
         """
         with open(filename) as f:
             json_data = json.load(f)
