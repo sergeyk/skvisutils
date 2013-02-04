@@ -1,7 +1,14 @@
-# skvisutils: Sergey Karayev Vision Utils
+# skvisutils: Sergey Karayev's Vision Utils
 
-Helpful classes and methods for dealing with object recognition data and tasks.
+Helpful classes and methods for dealing with object recognition (both classification and detection) data and tasks.
+
+## Docs
+
+Docs are built with Sphinx and hosted [here][1].
 
 ## Tasks
 
-[] convert BoundingBox class to just module methods for dealing with [x,y,w,h] and [x1,y1,x2,y2] arrays
+Tasks are tracked on the [Trello board][2].
+
+[1]: #TODO
+[2]: https://trello.com/board/skvisutils/510f24f4d39ba1e30a004e34

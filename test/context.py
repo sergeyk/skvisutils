@@ -19,8 +19,8 @@ test_data2 = os.path.join(test_support_dir,'data2.json')
 res_dir = os.path.join(test_dir, 'temp','res')
 temp_dir = os.path.join(test_dir, 'temp','temp')
 pascal_dir = os.path.join(test_support_dir, 'VOC2007')
-config = skvisutils.Config(res_dir,temp_dir,pascal_dir)
+test_config = skvisutils.Config(res_dir, temp_dir, pascal_dir)
 
 # create config for full tests
 PATH_TO_VOC2007 = '/Users/sergeyk/work/vision_data/VOC2007'
-full_config = skvisutils.Config(res_dir,temp_dir,PATH_TO_VOC2007)
+full_config = skvisutils.Config(res_dir, temp_dir, PATH_TO_VOC2007)
