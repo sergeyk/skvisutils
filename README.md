@@ -1,14 +1,5 @@
-# skvisutils: Sergey Karayev's Vision Utils
+# sergeyk's vision utils
 
 Helpful classes and methods for dealing with object recognition (both classification and detection) data and tasks.
 
-## Docs
-
-Docs are built with Sphinx and hosted [here][1].
-
-## Tasks
-
-Tasks are tracked on the [Trello board][2].
-
-[1]: #TODO
-[2]: https://trello.com/board/skvisutils/510f24f4d39ba1e30a004e34
+This repo is relevant only as support for the [Timely Object Recognition](https://github.com/sergeyk/timely_object_recognition) code release in support of the NIPS 2012 publication.
